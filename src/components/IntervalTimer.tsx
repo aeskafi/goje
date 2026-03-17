@@ -413,9 +413,14 @@ export function IntervalTimer() {
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Number of Sets</label>
                     <div className="flex items-center justify-between bg-white/5 rounded-2xl p-4 border border-white/10">
-                      <button onClick={() => setBatchSets(Math.max(1, batchSets - 1))} className="p-2"><Minus/></button>
-                      <span className="text-2xl font-black font-mono">{batchSets}</span>
-                      <button onClick={() => setBatchSets(batchSets + 1)} className="p-2"><Plus/></button>
+                      <button onClick={() => setBatchSets(Math.max(1, batchSets - 1))} className="p-2 text-white/40 hover:text-white"><Minus/></button>
+                      <input 
+                        type="number" 
+                        value={batchSets} 
+                        onChange={e => setBatchSets(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-20 bg-transparent text-center text-2xl font-black font-mono text-white focus:outline-none"
+                      />
+                      <button onClick={() => setBatchSets(batchSets + 1)} className="p-2 text-white/40 hover:text-white"><Plus/></button>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">

@@ -58,7 +58,7 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden min-h-[500px] flex flex-col justify-center">
+        <div className="bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden min-h-[600px] flex flex-col">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -66,6 +66,7 @@ export default function Home() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
               transition={{ duration: 0.2 }}
+              className="flex-1 flex flex-col"
             >
               {activeTab === 'timer' ? <IntervalTimer /> : <Stopwatch />}
             </motion.div>

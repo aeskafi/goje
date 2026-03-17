@@ -14,8 +14,8 @@ export function useAudio() {
       if (!audioContext.current) {
         audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
         gainNode.current = audioContext.current.createGain();
-        // Lower the volume of sound effects to 0.4 so Voice Guidance is clearer
-        gainNode.current.gain.value = 0.4;
+        // Lower the volume of sound effects to 0.1 so Voice Guidance is much clearer
+        gainNode.current.gain.value = 0.1;
         gainNode.current.connect(audioContext.current.destination);
       }
       

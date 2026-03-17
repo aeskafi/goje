@@ -47,8 +47,21 @@ type SavedWorkout = {
   steps: WorkoutStep[];
 };
 
-const WORK_PHRASES = ["Let's go!", "Push it!", "All out!", "You got this!", "Power through!", "No excuses!", "Crush it!", "Stronger every second!"];
-const REST_PHRASES = ["Deep breaths.", "Recover and prep.", "Shake it off.", "Stay focused.", "You earned this rest.", "Ready for the next one?", "Great set!", "Keep that heart rate up."];
+const WORK_PHRASES = [
+  "Let's go!", "Push it!", "All out!", "You got this!", "Power through!", 
+  "No excuses!", "Crush it!", "Stronger every second!", "Earn that sweat!", 
+  "Dig deep!", "Maximum effort!", "Don't stop now!", "Finish strong!",
+  "Make it count!", "Believe in yourself!", "Break your limits!", "Be a beast!",
+  "Sweat is just fat crying!", "Stay hungry!", "No pain, no gain!"
+];
+const REST_PHRASES = [
+  "Deep breaths.", "Recover and prep.", "Shake it off.", "Stay focused.", 
+  "You earned this rest.", "Ready for the next one?", "Great set!", 
+  "Keep that heart rate up.", "Nice work!", "Hydrate and breathe.", 
+  "Almost there!", "Prepare for battle.", "Regroup and recharge.",
+  "Stay loose.", "Focus on your_breath.", "You're doing amazing.",
+  "Quick rest, then back to work.", "Enjoy the silence.", "Mind over matter."
+];
 
 // --- Sortable Item Component ---
 function SortableStep({ 
@@ -226,29 +239,36 @@ export function IntervalTimer() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col relative">
-      {/* Background Distance Mode Effect - Moved to root level of card for full coverage */}
+    <div className="w-full h-full flex flex-col relative flex-1">
+      {/* Background Distance Mode Effect - Improved coverage and behavior */}
       <AnimatePresence>
-        {isStarted && !isPaused && (
+        {isStarted && (
           <motion.div
+            key="bg-effect"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.25 }}
+            animate={{ 
+              opacity: isPaused ? 0.15 : 0.25,
+              scale: isPaused ? 1 : [1, 1.05, 1],
+            }}
             exit={{ opacity: 0 }}
             className={cn(
-              "absolute -inset-[2rem] z-0 pointer-events-none",
+              "absolute inset-0 z-0 pointer-events-none transition-colors duration-700",
               steps[currentStepIndex].type === 'work' ? "bg-red-500" : "bg-blue-500"
             )}
             style={{ 
               boxShadow: steps[currentStepIndex].type === 'work' 
-                ? "inset 0 0 100px rgba(239, 68, 68, 0.5)" 
-                : "inset 0 0 100px rgba(59, 130, 246, 0.5)" 
+                ? "inset 0 0 150px rgba(239, 68, 68, 0.6)" 
+                : "inset 0 0 150px rgba(59, 130, 246, 0.6)" 
             }}
-            transition={{ repeat: Infinity, duration: 2, repeatType: "reverse" }}
+            transition={isPaused ? { duration: 0.5 } : { 
+              opacity: { duration: 0.5 },
+              scale: { repeat: Infinity, duration: 3, ease: "easeInOut" }
+            }}
           />
         )}
       </AnimatePresence>
 
-      <div className="relative z-10 p-6 flex flex-col h-full min-h-[500px]">
+      <div className="relative z-10 p-6 flex flex-col h-full flex-1 min-h-0">
         {!isStarted ? (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 flex-1 flex flex-col min-h-0">
             <div className="flex items-center justify-between">

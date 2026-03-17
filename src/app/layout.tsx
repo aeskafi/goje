@@ -22,11 +22,12 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "GOJE TRAINING | High-Precision Workout Timer",
-  description: "A premium, high-precision interval timer and stopwatch for elite training. Features custom timelines, screen wake-lock, and audio cues.",
+  description:
+    "A premium, high-precision interval timer and stopwatch for elite training. Features custom timelines, screen wake-lock, and audio cues.",
   manifest: "/manifest.json",
   icons: {
-    icon: "/icon-512.png",
-    apple: "/icon-512.png",
+    icon: "/icon-512x512.png",
+    apple: "/icon-512x512.png",
   },
   openGraph: {
     title: "GOJE TRAINING",

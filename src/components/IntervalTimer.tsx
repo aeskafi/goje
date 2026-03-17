@@ -220,7 +220,7 @@ export function IntervalTimer() {
                 transition={{ repeat: Infinity, duration: 1 }}
                 className={cn(
                   "text-[10rem] leading-none font-mono font-black text-white tracking-tighter tabular-nums drop-shadow-[0_0_50px_rgba(255,255,255,0.3)]",
-                  !isWorkPhase && "text-blue-400"
+                  steps[currentStepIndex].type !== 'work' && "text-blue-400"
                 )}
               >
                 {formatTime(timeLeft)}

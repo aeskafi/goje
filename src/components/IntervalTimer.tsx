@@ -190,6 +190,7 @@ export function IntervalTimer() {
 
   const stopWorkout = useCallback(() => {
     setIsStarted(false);
+    setIsPaused(false);
     releaseWakeLock();
     unlock();
   }, [releaseWakeLock, unlock]);
@@ -240,6 +241,7 @@ export function IntervalTimer() {
   const startWorkout = () => {
     if (steps.length === 0) return;
     setIsStarted(true);
+    setIsPaused(false);
     setCurrentStepIndex(0);
     setTimeLeft(steps[0].duration);
     playSound(steps[0].type === 'work' ? 'start_work' : 'start_rest');

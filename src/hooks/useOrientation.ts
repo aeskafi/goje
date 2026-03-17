@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { ScreenOrientation, OrientationLock } from '@capacitor/screen-orientation';
+import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { Capacitor } from '@capacitor/core';
 
 export function useOrientation() {

@@ -161,6 +161,11 @@ export function IntervalTimer() {
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
   const { lockLandscape, unlock } = useOrientation();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const workoutRef = useRef({ steps, currentStepIndex });
+
+  useEffect(() => {
+    workoutRef.current = { steps, currentStepIndex };
+  }, [steps, currentStepIndex]);
 
   // DnD Sensors
   const sensors = useSensors(
@@ -208,7 +213,8 @@ export function IntervalTimer() {
     if (isStarted && !isPaused) {
       timerRef.current = setInterval(() => {
         setTimeLeft(prev => {
-          const totalTime = steps[currentStepIndex].duration;
+          const { steps: currentSteps, currentStepIndex: currentIndex } = workoutRef.current;
+          const totalTime = currentSteps[currentIndex].duration;
           const halfway = Math.floor(totalTime / 2);
 
           // Announce halfway point (only for intervals > 15s)
@@ -229,7 +235,7 @@ export function IntervalTimer() {
       if (timerRef.current) clearInterval(timerRef.current);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [isStarted, isPaused, nextStep, speak, currentStepIndex, steps]);
+  }, [isStarted, isPaused, nextStep, speak]);
 
   const startWorkout = () => {
     if (steps.length === 0) return;

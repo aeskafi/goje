@@ -6,12 +6,17 @@ type SoundName = 'start_work' | 'start_rest' | 'countdown' | 'finish';
 
 export function useAudio() {
   const audioContext = useRef<AudioContext | null>(null);
+  const gainNode = useRef<GainNode | null>(null);
   const sounds = useRef<Record<string, AudioBuffer>>({});
 
   const loadSound = useCallback(async (name: SoundName, url: string) => {
     try {
       if (!audioContext.current) {
         audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        gainNode.current = audioContext.current.createGain();
+        // Lower the volume of sound effects to 0.4 so Voice Guidance is clearer
+        gainNode.current.gain.value = 0.4;
+        gainNode.current.connect(audioContext.current.destination);
       }
       
       const response = await fetch(url);
@@ -31,7 +36,7 @@ export function useAudio() {
   }, [loadSound]);
 
   const playSound = useCallback((name: SoundName) => {
-    if (!audioContext.current || !sounds.current[name]) return;
+    if (!audioContext.current || !sounds.current[name] || !gainNode.current) return;
     
     if (audioContext.current.state === 'suspended') {
       audioContext.current.resume();
@@ -40,7 +45,7 @@ export function useAudio() {
     try {
       const source = audioContext.current.createBufferSource();
       source.buffer = sounds.current[name];
-      source.connect(audioContext.current.destination);
+      source.connect(gainNode.current);
       source.start(0);
     } catch (error) {
       console.error(`Error playing sound: ${name}`, error);

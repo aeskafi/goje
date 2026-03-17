@@ -68,7 +68,7 @@ const HALFWAY_PHRASES = [
   "Over the hump!", "50% done, 100% effort remaining!", "Keep that pace, you're halfway!"
 ];
 
-// ... Sortable Item Component ---
+// --- Sortable Item Component ---
 function SortableStep({ 
   step, 
   idx, 
@@ -148,7 +148,8 @@ export function IntervalTimer() {
   const dndId = useId();
 
   useEffect(() => {
-    setMounted(true);
+    const frame = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   // Batch Adder State
@@ -210,40 +211,44 @@ export function IntervalTimer() {
     announceStep(steps[nextIdx]);
   }, [currentStepIndex, steps, playSound, speak, announceStep, stopWorkout]);
 
+  // Handle Side Effects reactively to timeLeft
+  useEffect(() => {
+    if (!isStarted || isPaused) return;
+
+    const { steps: currentSteps, currentStepIndex: currentIndex } = workoutRef.current;
+    const totalTime = currentSteps[currentIndex].duration;
+    const halfway = Math.floor(totalTime / 2);
+
+    if (totalTime >= 15 && timeLeft === halfway) {
+      const randomHalfway = HALFWAY_PHRASES[Math.floor(Math.random() * HALFWAY_PHRASES.length)];
+      speak(randomHalfway);
+    }
+
+    if (timeLeft === 3) {
+      playSound('countdown');
+      speak("3... 2... 1...");
+    }
+
+    if (timeLeft <= 0) {
+      nextStep();
+    }
+  }, [timeLeft, isStarted, isPaused, nextStep, speak, playSound]);
+
+  // Main Timer Interval
   useEffect(() => {
     if (isStarted && !isPaused) {
       timerRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          const { steps: currentSteps, currentStepIndex: currentIndex } = workoutRef.current;
-          const totalTime = currentSteps[currentIndex].duration;
-          const halfway = Math.floor(totalTime / 2);
-
-          // Announce halfway point (only for intervals > 15s)
-          if (totalTime >= 15 && prev === halfway) {
-            const randomHalfway = HALFWAY_PHRASES[Math.floor(Math.random() * HALFWAY_PHRASES.length)];
-            speak(randomHalfway);
-          }
-
-          if (prev === 4) {
-            playSound('countdown');
-            speak("3... 2... 1...");
-          }
-          if (prev <= 1) {
-            nextStep();
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeLeft(prev => Math.max(0, prev - 1));
       }, 1000);
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [isStarted, isPaused, nextStep, speak, playSound]);
+  }, [isStarted, isPaused]);
 
   const startWorkout = () => {
     if (steps.length === 0) return;
-    initAudio(); // Initialize AudioContext on user interaction
+    initAudio();
     setIsStarted(true);
     setIsPaused(false);
     setCurrentStepIndex(0);
@@ -279,7 +284,6 @@ export function IntervalTimer() {
 
   return (
     <div className="w-full h-full flex flex-col relative flex-1">
-      {/* Background Distance Mode Effect - Improved coverage and behavior */}
       <AnimatePresence>
         {isStarted && (
           <motion.div
@@ -428,7 +432,6 @@ export function IntervalTimer() {
         )}
       </div>
 
-      {/* Overlays (Batch & Library) remain unchanged but integrated into the new structure */}
       <AnimatePresence>
         {batchOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-50 bg-black/95 backdrop-blur-xl p-8 flex flex-col justify-center items-center">

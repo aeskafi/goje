@@ -73,4 +73,4 @@ export function useAudio() {
   }, []);
 
   return { playSound, initAudio };
-},
+}

@@ -156,7 +156,7 @@ export function IntervalTimer() {
   const [batchWork, setBatchWork] = useState(40);
   const [batchRest, setBatchRest] = useState(20);
 
-  const { playSound } = useAudio();
+  const { playSound, initAudio } = useAudio();
   const { speak } = useTextToSpeech();
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
   const { lockLandscape, unlock } = useOrientation();
@@ -224,7 +224,10 @@ export function IntervalTimer() {
             speak(randomHalfway);
           }
 
-          if (prev === 4) speak("3... 2... 1...");
+          if (prev === 4) {
+            playSound('countdown');
+            speak("3... 2... 1...");
+          }
           if (prev <= 1) {
             nextStep();
             return 0;
@@ -236,10 +239,11 @@ export function IntervalTimer() {
       if (timerRef.current) clearInterval(timerRef.current);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [isStarted, isPaused, nextStep, speak]);
+  }, [isStarted, isPaused, nextStep, speak, playSound]);
 
   const startWorkout = () => {
     if (steps.length === 0) return;
+    initAudio(); // Initialize AudioContext on user interaction
     setIsStarted(true);
     setIsPaused(false);
     setCurrentStepIndex(0);

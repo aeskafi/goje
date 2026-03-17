@@ -8,17 +8,34 @@ export function useAudio() {
   const audioContext = useRef<AudioContext | null>(null);
   const gainNode = useRef<GainNode | null>(null);
   const sounds = useRef<Record<string, AudioBuffer>>({});
+  const isInitializing = useRef(false);
+
+  const initAudio = useCallback(() => {
+    if (audioContext.current || isInitializing.current) return;
+    isInitializing.current = true;
+
+    try {
+      const Context = window.AudioContext || (window as any).webkitAudioContext;
+      if (Context) {
+        audioContext.current = new Context();
+        gainNode.current = audioContext.current.createGain();
+        // Increased volume to 0.3 for better balance
+        gainNode.current.gain.value = 0.3;
+        gainNode.current.connect(audioContext.current.destination);
+      }
+    } catch (e) {
+      console.error('Failed to initialize AudioContext', e);
+    } finally {
+      isInitializing.current = false;
+    }
+  }, []);
 
   const loadSound = useCallback(async (name: SoundName, url: string) => {
     try {
-      if (!audioContext.current) {
-        audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-        gainNode.current = audioContext.current.createGain();
-        // Lower the volume of sound effects to 0.1 so Voice Guidance is much clearer
-        gainNode.current.gain.value = 0.1;
-        gainNode.current.connect(audioContext.current.destination);
-      }
-      
+      // Ensure context exists before loading
+      if (!audioContext.current) initAudio();
+      if (!audioContext.current) return;
+
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
       const audioBuffer = await audioContext.current.decodeAudioData(arrayBuffer);
@@ -26,20 +43,23 @@ export function useAudio() {
     } catch (error) {
       console.error(`Error loading sound: ${name}`, error);
     }
-  }, []);
+  }, [initAudio]);
 
   useEffect(() => {
-    loadSound('start_work', '/audio/start_work.mp3');
-    loadSound('start_rest', '/audio/start_rest.mp3');
-    loadSound('countdown', '/audio/countdown.mp3');
-    loadSound('finish', '/audio/finish.mp3');
+    const loadAll = async () => {
+      await loadSound('start_work', '/audio/start_work.mp3');
+      await loadSound('start_rest', '/audio/start_rest.mp3');
+      await loadSound('countdown', '/audio/countdown.mp3');
+      await loadSound('finish', '/audio/finish.mp3');
+    };
+    loadAll();
   }, [loadSound]);
 
-  const playSound = useCallback((name: SoundName) => {
+  const playSound = useCallback(async (name: SoundName) => {
     if (!audioContext.current || !sounds.current[name] || !gainNode.current) return;
     
     if (audioContext.current.state === 'suspended') {
-      audioContext.current.resume();
+      await audioContext.current.resume();
     }
 
     try {
@@ -52,5 +72,5 @@ export function useAudio() {
     }
   }, []);
 
-  return { playSound };
-}
+  return { playSound, initAudio };
+},

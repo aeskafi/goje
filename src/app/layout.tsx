@@ -42,6 +42,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -52,6 +54,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
+        <ServiceWorkerRegistration />
         {children}
       </body>
     </html>

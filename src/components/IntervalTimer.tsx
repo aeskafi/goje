@@ -28,6 +28,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useAudio } from '@/hooks/useAudio';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { useOrientation } from '@/hooks/useOrientation';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -148,6 +149,7 @@ export function IntervalTimer() {
   const { playSound } = useAudio();
   const { speak } = useTextToSpeech();
   const { requestWakeLock, releaseWakeLock } = useWakeLock();
+  const { lockLandscape, unlock } = useOrientation();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // DnD Sensors
@@ -171,12 +173,17 @@ export function IntervalTimer() {
     speak(text);
   }, [speak]);
 
+  const stopWorkout = useCallback(() => {
+    setIsStarted(false);
+    releaseWakeLock();
+    unlock();
+  }, [releaseWakeLock, unlock]);
+
   const nextStep = useCallback(() => {
     if (currentStepIndex >= steps.length - 1) {
       playSound('finish');
       speak("Workout complete. Well done.");
-      setIsStarted(false);
-      releaseWakeLock();
+      stopWorkout();
       return;
     }
     
@@ -185,7 +192,7 @@ export function IntervalTimer() {
     setTimeLeft(steps[nextIdx].duration);
     playSound(steps[nextIdx].type === 'work' ? 'start_work' : 'start_rest');
     announceStep(steps[nextIdx]);
-  }, [currentStepIndex, steps, playSound, speak, announceStep, releaseWakeLock]);
+  }, [currentStepIndex, steps, playSound, speak, announceStep, stopWorkout]);
 
   useEffect(() => {
     if (isStarted && !isPaused) {
@@ -213,6 +220,7 @@ export function IntervalTimer() {
     playSound(steps[0].type === 'work' ? 'start_work' : 'start_rest');
     announceStep(steps[0]);
     requestWakeLock();
+    lockLandscape();
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -334,29 +342,29 @@ export function IntervalTimer() {
             </button>
           </motion.div>
         ) : (
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex-1 flex flex-col items-center justify-center space-y-12 h-full">
-            <div className="space-y-4 text-center">
-              <h3 className="text-white/40 text-xl font-black italic uppercase tracking-[0.2em]">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex-1 flex flex-col items-center justify-center space-y-6 md:space-y-12 h-full">
+            <div className="space-y-2 md:space-y-4 text-center">
+              <h3 className="text-white/40 text-sm md:text-xl font-black italic uppercase tracking-[0.2em]">
                 {steps[currentStepIndex].type} PHASE • {currentStepIndex + 1}/{steps.length}
               </h3>
               <div className={cn(
-                "text-[10rem] leading-none font-mono font-black text-white tracking-tighter tabular-nums drop-shadow-[0_0_50px_rgba(255,255,255,0.3)]",
+                "text-[6rem] sm:text-[8rem] md:text-[10rem] leading-none font-mono font-black text-white tracking-tighter tabular-nums drop-shadow-[0_0_50px_rgba(255,255,255,0.3)]",
                 steps[currentStepIndex].type !== 'work' && "text-blue-400"
               )}>
                 {formatTime(timeLeft)}
               </div>
             </div>
 
-            <div className="flex items-center gap-8 relative z-20">
-              <button onClick={() => setIsPaused(!isPaused)} className="p-8 bg-white/10 backdrop-blur-xl rounded-full border border-white/20 hover:bg-white/20 transition-all group active:scale-90">
-                {isPaused ? <Play className="w-10 h-10 text-white fill-current" /> : <Pause className="w-10 h-10 text-white fill-current" />}
+            <div className="flex items-center gap-4 md:gap-8 relative z-20">
+              <button onClick={() => setIsPaused(!isPaused)} className="p-4 md:p-8 bg-white/10 backdrop-blur-xl rounded-full border border-white/20 hover:bg-white/20 transition-all group active:scale-90">
+                {isPaused ? <Play className="w-6 h-6 md:w-10 md:h-10 text-white fill-current" /> : <Pause className="w-6 h-6 md:w-10 md:h-10 text-white fill-current" />}
               </button>
-              <button onClick={() => { setIsStarted(false); releaseWakeLock(); }} className="p-8 bg-white/5 backdrop-blur-md rounded-full border border-white/10 hover:bg-white/10 transition-all text-white/40 hover:text-white active:scale-90">
-                <RotateCcw className="w-10 h-10" />
+              <button onClick={stopWorkout} className="p-4 md:p-8 bg-white/5 backdrop-blur-md rounded-full border border-white/10 hover:bg-white/10 transition-all text-white/40 hover:text-white active:scale-90">
+                <RotateCcw className="w-6 h-6 md:w-10 md:h-10" />
               </button>
             </div>
             
-            <div className="w-full max-w-[300px] flex gap-1.5 h-2">
+            <div className="w-full max-w-[200px] md:max-w-[300px] flex gap-1.5 h-1.5 md:h-2">
               {steps.map((s, i) => (
                 <div key={s.id} className={cn("flex-1 rounded-full transition-all duration-700", i < currentStepIndex ? "bg-white/40" : (i === currentStepIndex ? (s.type === 'work' ? "bg-red-500" : "bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]") : "bg-white/10"))} />
               ))}

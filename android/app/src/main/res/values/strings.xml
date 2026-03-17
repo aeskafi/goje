@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GOJE TRAINING</string>
+    <string name="title_activity_main">GOJE TRAINING</string>
+    <string name="package_name">com.aeskafi.goje</string>
+    <string name="custom_url_scheme">com.aeskafi.goje</string>
+</resources>

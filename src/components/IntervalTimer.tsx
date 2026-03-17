@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Play, Pause, RotateCcw, Plus, Minus, Trash2, Save, 
@@ -140,6 +140,12 @@ export function IntervalTimer() {
   const [savedWorkouts, setSavedWorkouts] = useState<SavedWorkout[]>([]);
   const [lastSavedName, setLastSavedName] = useState('');
   const [showCopied, setShowCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const dndId = useId();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Batch Adder State
   const [batchSets, setBatchSets] = useState(4);
@@ -303,33 +309,57 @@ export function IntervalTimer() {
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar min-h-0">
-              <DndContext 
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext 
-                  items={steps.map(s => s.id)}
-                  strategy={verticalListSortingStrategy}
+              {mounted ? (
+                <DndContext 
+                  id={dndId}
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
                 >
+                  <SortableContext 
+                    items={steps.map(s => s.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {steps.map((step, idx) => (
+                      <SortableStep 
+                        key={step.id} 
+                        step={step} 
+                        idx={idx} 
+                        formatTime={formatTime}
+                        onRemove={(id) => setSteps(prev => prev.filter(s => s.id !== id))}
+                        onDuplicate={(s) => setSteps(prev => {
+                          const newSteps = [...prev];
+                          const idx = newSteps.findIndex(x => x.id === s.id);
+                          newSteps.splice(idx + 1, 0, { ...s, id: Math.random().toString(36).substr(2, 9) });
+                          return newSteps;
+                        })}
+                        onUpdateDuration={(id, delta) => setSteps(prev => prev.map(s => s.id === id ? { ...s, duration: Math.max(5, s.duration + delta) } : s))}
+                      />
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              ) : (
+                <div className="space-y-2">
                   {steps.map((step, idx) => (
-                    <SortableStep 
+                    <div 
                       key={step.id} 
-                      step={step} 
-                      idx={idx} 
-                      formatTime={formatTime}
-                      onRemove={(id) => setSteps(prev => prev.filter(s => s.id !== id))}
-                      onDuplicate={(s) => setSteps(prev => {
-                        const newSteps = [...prev];
-                        const idx = newSteps.findIndex(x => x.id === s.id);
-                        newSteps.splice(idx + 1, 0, { ...s, id: Math.random().toString(36).substr(2, 9) });
-                        return newSteps;
-                      })}
-                      onUpdateDuration={(id, delta) => setSteps(prev => prev.map(s => s.id === id ? { ...s, duration: Math.max(5, s.duration + delta) } : s))}
-                    />
+                      className={cn(
+                        "p-4 rounded-2xl border flex items-center justify-between group transition-all mb-2", 
+                        step.type === 'work' ? "bg-red-500/5 border-red-500/20" : "bg-blue-500/5 border-blue-500/20"
+                      )}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-1 rounded"><GripVertical className="w-4 h-4 text-white/20" /></div>
+                        <span className="text-white/20 font-black italic min-w-[1.5rem]">{idx + 1}</span>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-white/40">{step.type}</p>
+                          <p className="text-xl font-mono font-black text-white">{formatTime(step.duration)}</p>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </SortableContext>
-              </DndContext>
+                </div>
+              )}
               
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <button onClick={() => setSteps(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), type: 'work', duration: 40 }])} className="py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl border border-red-500/20 text-xs font-black uppercase tracking-widest transition-all">+ Add Work</button>

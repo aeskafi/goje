@@ -2,6 +2,12 @@
 
 **GOJE TRAINING** is a premium, high-precision workout timer designed for elite training. It combines a versatile interval timer with a millisecond-accurate stopwatch in a modern, immersive, and professional interface.
 
+## 📸 Gallery
+
+| Timeline & Setup | Active Work Mode | Batch Generator |
+| :---: | :---: | :---: |
+| ![Timeline Setup](assets/screenshots/timeline.png) | ![Active Work](assets/screenshots/work-mode.png) | ![Batch Generator](assets/screenshots/batch-gen.png) |
+
 ## ✨ Elite Features
 
 - **Dynamic Workout Timeline:** Create custom sequences with unique work and rest durations.

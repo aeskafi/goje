@@ -9,6 +9,7 @@
 - **Batch Generator:** Instantly generate multiple work/rest sets for high-intensity training.
 - **Voice Guidance (TTS):** Premium English text-to-speech voice guidance that motivates you through every phase.
 - **Energetic Motivational Cues:** "Sweat is just fat crying!", "Stay hungry!", "Don't stop now!"—over 40 energetic phrases to keep you moving.
+- **Halfway Announcements:** Motivation exactly when you need it—hear a boost right at the midpoint of your sets.
 - **Distance Mode:** An immersive, color-coded background (Red for Work, Blue for Rest) that pulses with your heart rate and is visible from across the room.
 - **Automatic Orientation Lock:** Automatically locks to **Landscape Mode** when a workout starts for maximum visibility on any screen.
 - **Smart Library:** Save and load your favorite workout routines locally on your device.

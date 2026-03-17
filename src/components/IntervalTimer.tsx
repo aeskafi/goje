@@ -63,8 +63,12 @@ const REST_PHRASES = [
   "Stay loose.", "Focus on your_breath.", "You're doing amazing.",
   "Quick rest, then back to work.", "Enjoy the silence.", "Mind over matter."
 ];
+const HALFWAY_PHRASES = [
+  "Halfway there!", "Middle of the road, keep going!", "You're halfway through!", 
+  "Over the hump!", "50% done, 100% effort remaining!", "Keep that pace, you're halfway!"
+];
 
-// --- Sortable Item Component ---
+// ... Sortable Item Component ---
 function SortableStep({ 
   step, 
   idx, 
@@ -204,6 +208,15 @@ export function IntervalTimer() {
     if (isStarted && !isPaused) {
       timerRef.current = setInterval(() => {
         setTimeLeft(prev => {
+          const totalTime = steps[currentStepIndex].duration;
+          const halfway = Math.floor(totalTime / 2);
+
+          // Announce halfway point (only for intervals > 15s)
+          if (totalTime >= 15 && prev === halfway) {
+            const randomHalfway = HALFWAY_PHRASES[Math.floor(Math.random() * HALFWAY_PHRASES.length)];
+            speak(randomHalfway);
+          }
+
           if (prev === 4) speak("3... 2... 1...");
           if (prev <= 1) {
             nextStep();
@@ -216,7 +229,7 @@ export function IntervalTimer() {
       if (timerRef.current) clearInterval(timerRef.current);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [isStarted, isPaused, nextStep, speak]);
+  }, [isStarted, isPaused, nextStep, speak, currentStepIndex, steps]);
 
   const startWorkout = () => {
     if (steps.length === 0) return;
